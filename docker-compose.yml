@@ -1,0 +1,31 @@
+services:
+
+  postgres-service:
+    image: postgres:15.5
+    container_name: postgres_payment_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: swd_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - payment_volume:/var/lib/postgresql/data
+    networks:
+      - payment-network
+
+  backend:
+    build: ./-swp391-project-management-tool
+    container_name: swp-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - postgres-service
+    networks:
+      - payment-network
+volumes:
+  payment_volume:
+networks:
+  payment-network:
