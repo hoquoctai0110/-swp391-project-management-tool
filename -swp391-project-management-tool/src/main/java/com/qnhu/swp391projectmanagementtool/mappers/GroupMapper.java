@@ -1,9 +1,11 @@
 package com.qnhu.swp391projectmanagementtool.mappers;
 
-import com.qnhu.swp391projectmanagementtool.dtos.*;
+import com.qnhu.swp391projectmanagementtool.dtos.GroupResponse;
+import com.qnhu.swp391projectmanagementtool.dtos.UserSimpleResponse;
 import com.qnhu.swp391projectmanagementtool.entities.Group;
 import com.qnhu.swp391projectmanagementtool.entities.User;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class GroupMapper {
@@ -28,18 +30,26 @@ public class GroupMapper {
             );
         }
 
+        List<UserSimpleResponse> members =
+                group.getMembers()
+                        .stream()
+                        .map(GroupMapper::toUserSimple)
+                        .collect(Collectors.toList());
+
         return new GroupResponse(
                 group.getGroupId(),
                 group.getGroupName(),
                 lecturer,
                 leader,
-                group.getMembers()
-                        .stream()
-                        .map(user -> new UserSimpleResponse(
-                                user.getUserId(),
-                                user.getUsername(),
-                                user.getRole().name()))
-                        .collect(Collectors.toList())
+                members
+        );
+    }
+
+    private static UserSimpleResponse toUserSimple(User user) {
+        return new UserSimpleResponse(
+                user.getUserId(),
+                user.getUsername(),
+                user.getRole().name()
         );
     }
 }

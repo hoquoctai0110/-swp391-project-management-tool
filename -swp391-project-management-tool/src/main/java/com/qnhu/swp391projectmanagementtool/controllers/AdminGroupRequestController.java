@@ -1,9 +1,13 @@
 package com.qnhu.swp391projectmanagementtool.controllers;
 
+import com.qnhu.swp391projectmanagementtool.dtos.GroupRequestResponse;
+import com.qnhu.swp391projectmanagementtool.dtos.UserSimpleResponse;
 import com.qnhu.swp391projectmanagementtool.entities.GroupRequest;
 import com.qnhu.swp391projectmanagementtool.repositories.GroupRequestRepository;
 import com.qnhu.swp391projectmanagementtool.services.interfaces.GroupRequestService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,11 +21,39 @@ public class AdminGroupRequestController {
     private final GroupRequestRepository groupRequestRepository;
 
     @GetMapping
-    public List<GroupRequest> getAllRequests() {
-        return groupRequestRepository.findAll();
+    @Transactional
+    public List<GroupRequestResponse> getAllRequests() {
+
+        return groupRequestRepository.findAll()
+                .stream()
+                .map(r -> new GroupRequestResponse(
+
+                        r.getRequestId(),
+                        r.getGroupName(),
+
+                        new UserSimpleResponse(
+                                r.getLecturer().getUserId(),
+                                r.getLecturer().getUsername()
+                        ),
+
+                        new UserSimpleResponse(
+                                r.getLeader().getUserId(),
+                                r.getLeader().getUsername()
+                        ),
+
+                        r.getMembers().stream()
+                                .map(m -> new UserSimpleResponse(
+                                        m.getUserId(),
+                                        m.getUsername()
+                                ))
+                                .toList(),
+
+                        r.getStatus().name()
+                ))
+                .toList();
     }
 
-    @PostMapping("/{id}/approve")
+    @PutMapping("/{id}/approve")
     public String approveRequest(@PathVariable int id) {
 
         groupRequestService.approveRequest(id);
@@ -29,7 +61,7 @@ public class AdminGroupRequestController {
         return "Request approved successfully!";
     }
 
-    @PostMapping("/{id}/reject")
+    @PutMapping("/{id}/reject")
     public String rejectRequest(@PathVariable int id) {
 
         groupRequestService.rejectRequest(id);

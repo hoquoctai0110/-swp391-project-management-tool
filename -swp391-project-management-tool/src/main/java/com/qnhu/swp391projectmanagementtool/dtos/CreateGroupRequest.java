@@ -5,7 +5,7 @@ import java.util.List;
 public class CreateGroupRequest {
 
     private String groupName;
-    private String projectKey;
+    private int lecturerId;
     private int leaderId;
     private List<Integer> memberIds;
 
@@ -17,12 +17,13 @@ public class CreateGroupRequest {
         this.groupName = groupName;
     }
 
-    public String getProjectKey() {
-        return projectKey;
+
+    public int getLecturerId() {
+        return lecturerId;
     }
 
-    public void setProjectKey(String projectKey) {
-        this.projectKey = projectKey;
+    public void setLecturerId(int lecturerId) {
+        this.lecturerId = lecturerId;
     }
 
     public int getLeaderId() {
