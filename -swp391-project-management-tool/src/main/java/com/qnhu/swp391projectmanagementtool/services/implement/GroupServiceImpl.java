@@ -34,7 +34,9 @@ public class GroupServiceImpl implements IGroupService {
         Group group = new Group();
         group.setGroupName(groupName);
 
-        return GroupMapper.toResponse(groupRepository.save(group));
+        Group savedGroup = groupRepository.save(group);
+
+        return GroupMapper.toResponse(savedGroup);
     }
 
     @Override
@@ -53,9 +55,11 @@ public class GroupServiceImpl implements IGroupService {
         if (user.getRole() == Role.ROLE_LECTURER) {
             group.setLecturer(user);
         } else {
+
             if (group.getMembers().contains(user)) {
                 throw new RuntimeException("User already in group");
             }
+
             group.addMember(user);
         }
 
@@ -81,12 +85,12 @@ public class GroupServiceImpl implements IGroupService {
         User user = userRepository.findById(leaderId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-
         if (!group.getMembers().contains(user)) {
             throw new RuntimeException("User must be a member of this group");
         }
 
         group.setTeamLeader(user);
+
         groupRepository.save(group);
 
         if (group.getProjectKey() != null && !group.getProjectKey().isBlank()) {
@@ -96,6 +100,7 @@ public class GroupServiceImpl implements IGroupService {
 
     @Override
     public List<GroupResponse> getAllGroups() {
+
         return groupRepository.findAll()
                 .stream()
                 .map(GroupMapper::toResponse)
@@ -143,6 +148,7 @@ public class GroupServiceImpl implements IGroupService {
                 .map(GroupMapper::toResponse)
                 .toList();
     }
+
     @Override
     public void removeMember(int groupId, int userId) {
 
@@ -158,10 +164,12 @@ public class GroupServiceImpl implements IGroupService {
 
         if (group.getTeamLeader() != null &&
                 group.getTeamLeader().getUserId() == userId) {
+
             group.setTeamLeader(null);
         }
 
         group.removeMember(user);
+
         groupRepository.save(group);
     }
 
@@ -172,6 +180,7 @@ public class GroupServiceImpl implements IGroupService {
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
         group.setLecturer(null);
+
         groupRepository.save(group);
     }
 }

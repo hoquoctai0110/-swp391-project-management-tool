@@ -12,6 +12,12 @@ public class UserSimpleResponse {
         this.role = role;
     }
 
+    // constructor thêm cho trường hợp không cần role
+    public UserSimpleResponse(int userId, String username) {
+        this.userId = userId;
+        this.username = username;
+    }
+
     public int getUserId() {
         return userId;
     }

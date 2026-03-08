@@ -18,4 +18,6 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
 
     List<Group> findByMembersContaining(User member);
 
+    boolean existsByProjectKey(String projectKey);
+
 }
