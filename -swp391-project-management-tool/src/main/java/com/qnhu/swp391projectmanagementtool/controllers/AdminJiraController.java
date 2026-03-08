@@ -1,27 +1,33 @@
 package com.qnhu.swp391projectmanagementtool.controllers;
 
-import com.qnhu.swp391projectmanagementtool.dtos.CreateJiraProjectRequest;
-import com.qnhu.swp391projectmanagementtool.services.interfaces.JiraService;
+import com.qnhu.swp391projectmanagementtool.entities.JiraProjectRequest;
+import com.qnhu.swp391projectmanagementtool.services.interfaces.JiraProjectRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/admin/groups")
+@RequestMapping("/api/admin/jira-requests")
 @RequiredArgsConstructor
 public class AdminJiraController {
 
-    public JiraService jiraService;
+    private final JiraProjectRequestService jiraProjectRequestService;
 
-    @PostMapping("/{groupId}/jira-project")
-    public String createJiraProject(@PathVariable int groupId,
-                                    @RequestBody CreateJiraProjectRequest request) {
+    @GetMapping("/pending")
+    public List<JiraProjectRequest> getPendingRequests() {
+        return jiraProjectRequestService.getPendingRequests();
+    }
 
-        jiraService.createProjectForGroup(
-                groupId,
-                request.getProjectKey(),
-                request.getProjectName()
-        );
+    @PutMapping("/{requestId}/approve")
+    public String approveRequest(@PathVariable int requestId) {
+        jiraProjectRequestService.approveRequest(requestId);
+        return "Jira project request approved successfully!";
+    }
 
-        return "Jira project created successfully!";
+    @PutMapping("/{requestId}/reject")
+    public String rejectRequest(@PathVariable int requestId) {
+        jiraProjectRequestService.rejectRequest(requestId);
+        return "Jira project request rejected successfully!";
     }
 }
