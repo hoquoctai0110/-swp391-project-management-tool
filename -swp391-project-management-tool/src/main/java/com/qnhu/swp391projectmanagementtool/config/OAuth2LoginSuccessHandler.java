@@ -39,8 +39,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Authentication authentication)
+            HttpServletResponse response,
+            Authentication authentication)
             throws IOException, ServletException {
 
         Object principal = authentication.getPrincipal();
@@ -50,11 +50,35 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (principal instanceof DefaultOAuth2User oauthUser) {
             Object emailObj = oauthUser.getAttributes().get("email");
             Object nameObj = oauthUser.getAttributes().get("name");
-            if (emailObj != null) email = emailObj.toString();
-            if (nameObj != null) name = nameObj.toString();
+
+            if (emailObj != null) {
+                email = emailObj.toString();
+            } else {
+                Object loginObj = oauthUser.getAttributes().get("login");
+                if (loginObj != null) {
+                    email = loginObj.toString() + "@github.com";
+                } else {
+                    Object idObj = oauthUser.getAttributes().get("id");
+                    if (idObj != null) {
+                        email = idObj.toString() + "@oauth2.internal";
+                    }
+                }
+            }
+
+            if (nameObj != null) {
+                name = nameObj.toString();
+            } else {
+                Object loginObj = oauthUser.getAttributes().get("login");
+                if (loginObj != null) {
+                    name = loginObj.toString();
+                } else {
+                    name = email;
+                }
+            }
         }
 
-        if (email == null) email = authentication.getName();
+        if (email == null)
+            email = authentication.getName() + "@oauth2.internal";
         if (email == null || email.isBlank()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Email not provided");
             return;

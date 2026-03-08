@@ -12,7 +12,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
     private String username;
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -22,6 +22,11 @@ public class User {
     private String jiraAccountId;
     @Column(name = "jira_synced")
     private Boolean jiraSynced = false;
+
+    @Column(name = "github_account_id")
+    private String githubAccountId;
+    @Column(name = "github_synced")
+    private Boolean githubSynced = false;
 
     public User() {
     }
@@ -53,10 +58,10 @@ public class User {
     public Role getRole() {
         return role;
     }
+
     public void setRole(Role role) {
         this.role = role;
     }
-
 
     public Integer getYob() {
         return yob;
@@ -74,8 +79,13 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getJiraAccountId() { return jiraAccountId; }
-    public void setJiraAccountId(String jiraAccountId) { this.jiraAccountId = jiraAccountId; }
+    public String getJiraAccountId() {
+        return jiraAccountId;
+    }
+
+    public void setJiraAccountId(String jiraAccountId) {
+        this.jiraAccountId = jiraAccountId;
+    }
 
     public Boolean getJiraSynced() {
         return jiraSynced;
@@ -83,6 +93,22 @@ public class User {
 
     public void setJiraSynced(Boolean jiraSynced) {
         this.jiraSynced = jiraSynced;
+    }
+
+    public String getGithubAccountId() {
+        return githubAccountId;
+    }
+
+    public void setGithubAccountId(String githubAccountId) {
+        this.githubAccountId = githubAccountId;
+    }
+
+    public Boolean getGithubSynced() {
+        return githubSynced;
+    }
+
+    public void setGithubSynced(Boolean githubSynced) {
+        this.githubSynced = githubSynced;
     }
 
     public void login() {
