@@ -21,7 +21,6 @@ public class Group {
     @Column(name = "project_id")
     private String projectId;
 
-    // ✅ Lecturer giờ là User
     @ManyToOne
     @JoinColumn(name = "lecturer_id")
     private User lecturer;

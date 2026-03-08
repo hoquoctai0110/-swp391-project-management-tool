@@ -15,6 +15,12 @@ public class GroupRequest {
 
     private String groupName;
 
+    private String projectKey;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     @ManyToOne
     @JoinColumn(name = "lecturer_id")
     private User lecturer;
@@ -41,6 +47,12 @@ public class GroupRequest {
 
     public String getGroupName() { return groupName; }
     public void setGroupName(String groupName) { this.groupName = groupName; }
+
+    public String getProjectKey() { return projectKey; }
+    public void setProjectKey(String projectKey) { this.projectKey = projectKey; }
+
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 
     public User getLecturer() { return lecturer; }
     public void setLecturer(User lecturer) { this.lecturer = lecturer; }

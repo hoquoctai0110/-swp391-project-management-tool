@@ -27,11 +27,23 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+
+                                "/",
+                                "/error",
+
+                                "/api/auth/**",      // login API
+                                "/oauth2/**",        // OAuth2 endpoint
+
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -39,19 +51,19 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/v2/api-docs",
                                 "/v3/api-docs.yaml",
+
                                 "/api/admin/**",
                                 "/api/jira/test"
+
                         ).permitAll()
+
                         .anyRequest().authenticated()
                 )
-//                .exceptionHandling(ex -> ex
-//                        .authenticationEntryPoint((request, response, authException) -> {
-//                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//                            response.getWriter().write("Unauthorized");
-//                        })
-//                )
+
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(oAuth2UserService)
+                        )
                         .successHandler(successHandler)
                 );
 
