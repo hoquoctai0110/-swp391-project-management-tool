@@ -39,8 +39,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Authentication authentication)
+            HttpServletResponse response,
+            Authentication authentication)
             throws IOException, ServletException {
 
         Object principal = authentication.getPrincipal();
@@ -50,11 +50,35 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (principal instanceof DefaultOAuth2User oauthUser) {
             Object emailObj = oauthUser.getAttributes().get("email");
             Object nameObj = oauthUser.getAttributes().get("name");
-            if (emailObj != null) email = emailObj.toString();
-            if (nameObj != null) name = nameObj.toString();
+
+            if (emailObj != null) {
+                email = emailObj.toString();
+            } else {
+                Object loginObj = oauthUser.getAttributes().get("login");
+                if (loginObj != null) {
+                    email = loginObj.toString() + "@github.com";
+                } else {
+                    Object idObj = oauthUser.getAttributes().get("id");
+                    if (idObj != null) {
+                        email = idObj.toString() + "@oauth2.internal";
+                    }
+                }
+            }
+
+            if (nameObj != null) {
+                name = nameObj.toString();
+            } else {
+                Object loginObj = oauthUser.getAttributes().get("login");
+                if (loginObj != null) {
+                    name = loginObj.toString();
+                } else {
+                    name = email;
+                }
+            }
         }
 
-        if (email == null) email = authentication.getName();
+        if (email == null)
+            email = authentication.getName() + "@oauth2.internal";
         if (email == null || email.isBlank()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Email not provided");
             return;
@@ -94,12 +118,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String role = (user.getRole() != null) ? user.getRole().name() : Role.ROLE_MEMBER.name();
         String token = jwtUtil.generateToken(email, role);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("token", token);
-        body.put("email", email);
-        body.put("role", role);
+        // Tạo HttpOnly Cookie chứa Token để bảo mật (chống XSS)
+        jakarta.servlet.http.Cookie tokenCookie = new jakarta.servlet.http.Cookie("auth_token", token);
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setSecure(false); // Nếu chạy thực tế có HTTPS thì đổi thành true
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(24 * 60 * 60); // 1 ngày
 
-        response.setContentType("application/json;charset=UTF-8");
-        new ObjectMapper().writeValue(response.getOutputStream(), body);
+        response.addCookie(tokenCookie);
+
+        // Chuyển hướng về Frontend, không truyền token lộ liễu trên URL nữa
+        String frontendUrl = "http://localhost:5173/";
+        response.sendRedirect(frontendUrl);
     }
 }

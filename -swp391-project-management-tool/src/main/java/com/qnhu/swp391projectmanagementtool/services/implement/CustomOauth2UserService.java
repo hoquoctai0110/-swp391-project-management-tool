@@ -32,22 +32,43 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = (String) attributes.get("email");
-        String name = (String) attributes.getOrDefault("name", email);
 
+        if (email == null) {
+            Object loginObj = attributes.get("login");
+            if (loginObj != null) {
+                email = loginObj.toString() + "@github.com";
+            } else {
+                Object idObj = attributes.get("id");
+                String id = idObj != null ? idObj.toString() : "unknown";
+                email = id + "@oauth2.internal";
+            }
+        }
+
+        String name = (String) attributes.get("name");
+        if (name == null) {
+            Object loginObj = attributes.get("login");
+            if (loginObj != null) {
+                name = loginObj.toString();
+            } else {
+                name = email;
+            }
+        }
+
+        String finalEmail = email;
         User user = userRepository.findByEmail(email).orElseGet(User::new);
-        user.setEmail(email);
+        user.setEmail(finalEmail);
         user.setUsername(name);
 
-        Role role = determineRoleByEmail(email);
+        Role role = determineRoleByEmail(finalEmail);
         user.setRole(role);
 
         userRepository.save(user);
         return oauth2User;
     }
 
-
     private Role determineRoleByEmail(String email) {
-        if (email == null) return Role.ROLE_MEMBER;
+        if (email == null)
+            return Role.ROLE_MEMBER;
 
         if (email.equalsIgnoreCase(adminEmail)) {
             return Role.ROLE_ADMIN;

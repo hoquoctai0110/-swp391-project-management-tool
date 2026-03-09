@@ -14,7 +14,7 @@ public class JiraController {
 
     private final JiraService jiraService;
 
-    //để test kết nối thôi
+    // để test kết nối thôi
     @GetMapping("/test")
     public String testConnection() {
 
@@ -31,6 +31,18 @@ public class JiraController {
     public List<JiraIssue> getProjectIssues(@PathVariable String projectKey) {
 
         return jiraService.syncIssuesFromProject(projectKey);
-
+    }
+  
+    @GetMapping("/account-id")
+    public org.springframework.http.ResponseEntity<?> getJiraAccountId(@RequestParam String email) {
+        String accountId = jiraService.getAccountIdByEmail(email);
+        if (accountId != null) {
+            // Return JSON object
+            return org.springframework.http.ResponseEntity
+                    .ok(java.util.Collections.singletonMap("accountId", accountId));
+        } else {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND)
+                    .body(java.util.Collections.singletonMap("message", "User not found in Jira"));
+        }
     }
 }

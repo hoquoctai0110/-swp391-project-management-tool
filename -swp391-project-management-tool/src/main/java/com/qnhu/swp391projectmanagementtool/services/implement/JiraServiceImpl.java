@@ -45,9 +45,9 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-
             ResponseEntity<String> response =
                     restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
 
             return response.getStatusCode() == HttpStatus.OK;
 
@@ -105,7 +105,6 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(body, buildHeaders());
 
         try {
-
             ResponseEntity<String> response =
                     restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
@@ -133,7 +132,6 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(buildHeaders());
 
         try {
-
             ResponseEntity<String> response =
                     restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
@@ -202,8 +200,11 @@ public class JiraServiceImpl implements JiraService {
      * FIX: search user by query (NOT email)
      */
     private String findAccountId(String keyword) {
-
         try {
+        String url = jiraProperties.getUrl()
+                + "/rest/api/3/user/search?query={email}";
+
+        RestTemplate restTemplate = new RestTemplate();
 
             String url = jiraProperties.getUrl()
                     + "/rest/api/3/user/search?query=" + keyword;
@@ -310,7 +311,6 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-
             ResponseEntity<String> response =
                     restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
@@ -354,7 +354,6 @@ public class JiraServiceImpl implements JiraService {
                 "assignee",
                 "project"
         ));
-
         HttpEntity<Map<String, Object>> entity =
                 new HttpEntity<>(body, buildHeaders());
 
@@ -432,6 +431,4 @@ public class JiraServiceImpl implements JiraService {
 
         return issues;
     }
-
-
 }

@@ -25,15 +25,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
+        String token = null;
 
         if (header != null && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+        } else if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("auth_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
-            String token = header.substring(7);
+        if (token != null) {
 
             if (jwtUtil.validateToken(token)) {
 
@@ -43,14 +53,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String role = (String) claims.get("role");
 
                 SimpleGrantedAuthority authority =
-//                        new SimpleGrantedAuthority("ROLE_" + role);
+                        // new SimpleGrantedAuthority("ROLE_" + role);
                         new SimpleGrantedAuthority(role);
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                email,
-                                null,
-                                List.of(authority)
-                        );
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        email,
+                        null,
+                        List.of(authority));
 
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

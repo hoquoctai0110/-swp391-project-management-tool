@@ -26,6 +26,30 @@ public class UserController {
         return userRepository.findAll();
     }
 
+    @PutMapping("/integrations")
+    public org.springframework.http.ResponseEntity<?> updateIntegrations(
+            @RequestBody com.qnhu.swp391projectmanagementtool.dtos.UpdateIntegrationRequest request,
+            org.springframework.security.core.Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return org.springframework.http.ResponseEntity.badRequest().body("User not found");
+        }
+
+        if (request.getJiraAccountId() != null && !request.getJiraAccountId().isBlank()) {
+            user.setJiraAccountId(request.getJiraAccountId());
+            user.setJiraSynced(true);
+        }
+
+        if (request.getGithubAccountId() != null && !request.getGithubAccountId().isBlank()) {
+            user.setGithubAccountId(request.getGithubAccountId());
+            user.setGithubSynced(true);
+        }
+
+        userRepository.save(user);
+        return org.springframework.http.ResponseEntity.ok("Integrations updated successfully");
+    }
+
     // lấy danh sách lecturers
     @GetMapping("/lecturers")
     public List<User> getLecturers() {
