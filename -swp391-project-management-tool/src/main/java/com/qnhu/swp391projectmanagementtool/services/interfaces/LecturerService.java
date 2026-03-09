@@ -1,5 +1,6 @@
 package com.qnhu.swp391projectmanagementtool.services.interfaces;
 
+import com.qnhu.swp391projectmanagementtool.dtos.GroupProgressDto;
 import com.qnhu.swp391projectmanagementtool.dtos.LecturerDashboardDto;
 import com.qnhu.swp391projectmanagementtool.dtos.LecturerGroupDto;
 import com.qnhu.swp391projectmanagementtool.entities.JiraIssue;
@@ -14,4 +15,5 @@ public interface LecturerService {
 
     LecturerDashboardDto getDashboard();
 
+    GroupProgressDto getGroupProgress(Integer groupId);
 }

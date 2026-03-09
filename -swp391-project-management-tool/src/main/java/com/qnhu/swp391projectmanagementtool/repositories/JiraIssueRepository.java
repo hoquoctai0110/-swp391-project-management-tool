@@ -11,4 +11,6 @@ public interface JiraIssueRepository extends JpaRepository<JiraIssue, String> {
 
     long countByStatus(String status);
 
+    long countByProjectKeyAndStatus(String projectKey, String status);
+
 }

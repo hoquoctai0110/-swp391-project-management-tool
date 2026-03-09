@@ -1,5 +1,6 @@
 package com.qnhu.swp391projectmanagementtool.services.implement;
 
+import com.qnhu.swp391projectmanagementtool.dtos.GroupProgressDto;
 import com.qnhu.swp391projectmanagementtool.dtos.LecturerDashboardDto;
 import com.qnhu.swp391projectmanagementtool.dtos.LecturerGroupDto;
 import com.qnhu.swp391projectmanagementtool.entities.Group;
@@ -21,6 +22,7 @@ public class LecturerServiceImpl implements LecturerService {
     private final GroupRepository groupRepository;
     private final JiraIssueRepository jiraIssueRepository;
 
+    // 1. Lấy tất cả group của lecturer
     @Override
     public List<LecturerGroupDto> getAllGroups() {
 
@@ -35,14 +37,17 @@ public class LecturerServiceImpl implements LecturerService {
         }).collect(Collectors.toList());
     }
 
+    // 2. Lấy danh sách Jira issues của group
     @Override
     public List<JiraIssue> getGroupIssues(Integer groupId) {
 
-        Group group = groupRepository.findById(groupId).orElseThrow();
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found with id: " + groupId));
 
         return jiraIssueRepository.findByProjectKey(group.getProjectKey());
     }
 
+    // 3. Dashboard tổng quan cho lecturer
     @Override
     public LecturerDashboardDto getDashboard() {
 
@@ -53,6 +58,24 @@ public class LecturerServiceImpl implements LecturerService {
         dto.setTodo(jiraIssueRepository.countByStatus("To Do"));
         dto.setInProgress(jiraIssueRepository.countByStatus("In Progress"));
         dto.setDone(jiraIssueRepository.countByStatus("Done"));
+
+        return dto;
+    }
+
+    // 4. Progress của một group
+    @Override
+    public GroupProgressDto getGroupProgress(Integer groupId) {
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found with id: " + groupId));
+
+        String projectKey = group.getProjectKey();
+
+        GroupProgressDto dto = new GroupProgressDto();
+
+        dto.setTodo(jiraIssueRepository.countByProjectKeyAndStatus(projectKey, "To Do"));
+        dto.setInProgress(jiraIssueRepository.countByProjectKeyAndStatus(projectKey, "In Progress"));
+        dto.setDone(jiraIssueRepository.countByProjectKeyAndStatus(projectKey, "Done"));
 
         return dto;
     }
