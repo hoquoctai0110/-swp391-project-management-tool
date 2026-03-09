@@ -3,7 +3,9 @@ package com.qnhu.swp391projectmanagementtool.services.implement;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qnhu.swp391projectmanagementtool.config.JiraProperties;
+import com.qnhu.swp391projectmanagementtool.dtos.AdminDashboardDto;
 import com.qnhu.swp391projectmanagementtool.entities.Group;
+import com.qnhu.swp391projectmanagementtool.entities.JiraIssue;
 import com.qnhu.swp391projectmanagementtool.entities.User;
 import com.qnhu.swp391projectmanagementtool.enums.Role;
 import com.qnhu.swp391projectmanagementtool.repositories.GroupRepository;
@@ -13,9 +15,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import com.qnhu.swp391projectmanagementtool.dtos.JiraProjectDto;
+
+import java.util.*;
+
+import com.qnhu.swp391projectmanagementtool.repositories.JiraIssueRepository;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ public class JiraServiceImpl implements JiraService {
     private final JiraProperties jiraProperties;
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
+    private final JiraIssueRepository jiraIssueRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -288,4 +295,143 @@ public class JiraServiceImpl implements JiraService {
             throw new RuntimeException("Add user to role failed", e);
         }
     }
+
+    @Override
+    public List<JiraProjectDto> getAllProjects() {
+
+        String url = jiraProperties.getUrl() + "/rest/api/3/project/search";
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", buildAuthHeader());
+        headers.set("Accept", "application/json");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+
+            ResponseEntity<String> response =
+                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+            JsonNode root = objectMapper.readTree(response.getBody());
+
+            JsonNode values = root.get("values");
+
+            List<JiraProjectDto> projects = new ArrayList<>();
+
+            for (JsonNode p : values) {
+
+                JiraProjectDto dto = new JiraProjectDto();
+
+                dto.setId(p.get("id").asText());
+                dto.setKey(p.get("key").asText());
+                dto.setName(p.get("name").asText());
+
+                projects.add(dto);
+            }
+
+            return projects;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Cannot get Jira projects", e);
+        }
+    }
+
+    @Override
+    public List<JiraIssue> syncIssuesFromProject(String projectKey) {
+
+        String url = jiraProperties.getUrl() + "/rest/api/3/search/jql";
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("jql", "project=" + projectKey);
+
+        body.put("fields", List.of(
+                "summary",
+                "status",
+                "priority",
+                "assignee",
+                "project"
+        ));
+
+        HttpEntity<Map<String, Object>> entity =
+                new HttpEntity<>(body, buildHeaders());
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        List<JiraIssue> issues = new ArrayList<>();
+
+        try {
+
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode issuesNode = root.get("issues");
+
+            if (issuesNode == null || !issuesNode.isArray()) {
+                return issues;
+            }
+
+            for (JsonNode issueNode : issuesNode) {
+
+                JiraIssue issue = new JiraIssue();
+
+                if (issueNode.has("id")) {
+                    issue.setJiraIssueId(issueNode.get("id").asText());
+                }
+
+                if (issueNode.has("key")) {
+                    issue.setIssueKey(issueNode.get("key").asText());
+                }
+
+                JsonNode fields = issueNode.get("fields");
+
+                if (fields == null) {
+                    continue;
+                }
+
+                if (fields.has("summary")) {
+                    issue.setTitle(fields.get("summary").asText());
+                }
+
+                if (fields.has("status") && fields.get("status").has("name")) {
+                    issue.setStatus(fields.get("status").get("name").asText());
+                }
+
+                if (fields.has("priority") && !fields.get("priority").isNull()) {
+                    issue.setPriority(
+                            fields.get("priority").get("name").asText()
+                    );
+                }
+
+                if (fields.has("project") && fields.get("project").has("key")) {
+                    issue.setProjectKey(
+                            fields.get("project").get("key").asText()
+                    );
+                }
+
+                if (fields.has("assignee") && !fields.get("assignee").isNull()) {
+                    issue.setAssignee(
+                            fields.get("assignee").get("displayName").asText()
+                    );
+                }
+
+                jiraIssueRepository.save(issue);
+                issues.add(issue);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            throw new RuntimeException("Error parsing Jira issues", e);
+        }
+
+        return issues;
+    }
+
+
 }
