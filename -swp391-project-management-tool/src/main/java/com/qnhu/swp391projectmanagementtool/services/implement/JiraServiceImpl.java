@@ -38,8 +38,7 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             return response.getStatusCode() == HttpStatus.OK;
 
@@ -53,7 +52,6 @@ public class JiraServiceImpl implements JiraService {
         String encoded = Base64.getEncoder().encodeToString(auth.getBytes());
         return "Basic " + encoded;
     }
-
 
     @Override
     public void createProjectForGroup(int groupId, String projectKey, String projectName) {
@@ -74,20 +72,19 @@ public class JiraServiceImpl implements JiraService {
         String leadAccountId = getMyAccountId();
 
         String body = """
-            {
-              "key": "%s",
-              "name": "%s",
-              "projectTypeKey": "software",
-              "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
-              "leadAccountId": "%s"
-            }
-            """.formatted(projectKey, projectName, leadAccountId);
+                {
+                  "key": "%s",
+                  "name": "%s",
+                  "projectTypeKey": "software",
+                  "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
+                  "leadAccountId": "%s"
+                }
+                """.formatted(projectKey, projectName, leadAccountId);
 
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
             if (response.getStatusCode() == HttpStatus.CREATED) {
                 group.setProjectKey(projectKey);
@@ -110,8 +107,7 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             JsonNode root = objectMapper.readTree(response.getBody());
             return root.get("accountId").asText();
@@ -169,7 +165,7 @@ public class JiraServiceImpl implements JiraService {
     private String findAccountIdByEmail(String email) {
 
         String url = jiraProperties.getUrl()
-                + "/rest/api/3/user/search?query=" + encode(email);
+                + "/rest/api/3/user/search?query={email}";
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -180,8 +176,7 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class, email);
 
             JsonNode arr = objectMapper.readTree(response.getBody());
 
@@ -218,12 +213,12 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             JsonNode root = objectMapper.readTree(response.getBody());
 
-            if (!root.has(roleName)) return null;
+            if (!root.has(roleName))
+                return null;
 
             String roleUrl = root.get(roleName).asText();
             return roleUrl.substring(roleUrl.lastIndexOf("/") + 1);
@@ -245,8 +240,8 @@ public class JiraServiceImpl implements JiraService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String body = """
-        { "user": ["%s"] }
-        """.formatted(accountId);
+                { "user": ["%s"] }
+                """.formatted(accountId);
 
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
@@ -255,5 +250,10 @@ public class JiraServiceImpl implements JiraService {
         } catch (Exception ignored) {
             // Soft mode
         }
+    }
+
+    @Override
+    public String getAccountIdByEmail(String email) {
+        return findAccountIdByEmail(email);
     }
 }

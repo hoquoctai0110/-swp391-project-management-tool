@@ -19,7 +19,6 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
-
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -39,7 +38,7 @@ public class AuthController {
 
     @PutMapping("/me")
     public ResponseEntity<?> updateProfile(Authentication authentication,
-                                           @RequestBody UpdateProfileRequest req) {
+            @RequestBody UpdateProfileRequest req) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body("Not authenticated");
         }
@@ -73,7 +72,8 @@ public class AuthController {
             String phone = req.getPhoneNumber().trim();
             String digitsOnly = phone.replaceAll("\\s+", "");
             if (!digitsOnly.matches("^\\+?\\d{7,15}$")) {
-                return ResponseEntity.badRequest().body("phoneNumber invalid (should be digits, 7-15 chars, optional leading +)");
+                return ResponseEntity.badRequest()
+                        .body("phoneNumber invalid (should be digits, 7-15 chars, optional leading +)");
             }
             user.setPhoneNumber(digitsOnly);
         }
@@ -92,6 +92,8 @@ public class AuthController {
         m.put("role", user.getRole());
         m.put("yob", user.getYob());
         m.put("phoneNumber", user.getPhoneNumber());
+        m.put("githubAccountId", user.getGithubAccountId());
+        m.put("jiraAccountId", user.getJiraAccountId());
         return m;
     }
 }

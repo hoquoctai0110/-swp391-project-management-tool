@@ -118,12 +118,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String role = (user.getRole() != null) ? user.getRole().name() : Role.ROLE_MEMBER.name();
         String token = jwtUtil.generateToken(email, role);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("token", token);
-        body.put("email", email);
-        body.put("role", role);
+        // Tạo HttpOnly Cookie chứa Token để bảo mật (chống XSS)
+        jakarta.servlet.http.Cookie tokenCookie = new jakarta.servlet.http.Cookie("auth_token", token);
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setSecure(false); // Nếu chạy thực tế có HTTPS thì đổi thành true
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(24 * 60 * 60); // 1 ngày
 
-        response.setContentType("application/json;charset=UTF-8");
-        new ObjectMapper().writeValue(response.getOutputStream(), body);
+        response.addCookie(tokenCookie);
+
+        // Chuyển hướng về Frontend, không truyền token lộ liễu trên URL nữa
+        String frontendUrl = "http://localhost:5173/";
+        response.sendRedirect(frontendUrl);
     }
 }
