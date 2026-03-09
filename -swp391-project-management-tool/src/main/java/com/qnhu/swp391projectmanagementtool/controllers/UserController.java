@@ -59,7 +59,9 @@ public class UserController {
     // lấy danh sách members
     @GetMapping("/members")
     public List<User> getMembers() {
-        return userRepository.findByRole(Role.ROLE_MEMBER);
+        return userRepository.findByRoleIn(
+                List.of(Role.ROLE_MEMBER, Role.ROLE_LEADER)
+        );
     }
 
     // lấy user theo id (optional nhưng rất hữu ích)

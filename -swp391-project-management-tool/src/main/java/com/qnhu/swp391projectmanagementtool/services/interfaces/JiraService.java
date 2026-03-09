@@ -1,7 +1,11 @@
 package com.qnhu.swp391projectmanagementtool.services.interfaces;
+import com.qnhu.swp391projectmanagementtool.dtos.JiraProjectDto;
 
 import com.qnhu.swp391projectmanagementtool.entities.Group;
+import com.qnhu.swp391projectmanagementtool.entities.JiraIssue;
 import com.qnhu.swp391projectmanagementtool.entities.User;
+
+import java.util.List;
 
 public interface JiraService {
 
@@ -10,7 +14,8 @@ public interface JiraService {
     void createProjectForGroup(int groupId, String projectKey, String projectName);
 
     void syncUserToJiraProject(Group group, User user);
+    List<JiraProjectDto> getAllProjects();
 
-    String getAccountIdByEmail(String email);
+    List<JiraIssue> syncIssuesFromProject(String projectKey);
 
 }

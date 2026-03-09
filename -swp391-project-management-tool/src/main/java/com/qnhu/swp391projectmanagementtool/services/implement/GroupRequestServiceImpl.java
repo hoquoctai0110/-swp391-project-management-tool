@@ -105,17 +105,14 @@ public class GroupRequestServiceImpl implements GroupRequestService {
             throw new RuntimeException("Request already processed");
         }
 
-        // tạo group
         var groupResponse = groupService.createGroup(request.getGroupName());
 
         Group group = groupRepository.findById(groupResponse.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group not found after creation"));
 
-        // set lecturer
         group.setLecturer(request.getLecturer());
         groupRepository.save(group);
 
-        // add members
         for (User member : request.getMembers()) {
             groupService.addMember(group.getGroupId(), member.getUserId());
         }
@@ -126,31 +123,68 @@ public class GroupRequestServiceImpl implements GroupRequestService {
             groupService.addMember(group.getGroupId(), leader.getUserId());
         }
 
-        // assign leader
         groupService.assignLeader(group.getGroupId(), leader.getUserId());
 
-        // đổi role leader
         leader.setRole(Role.ROLE_LEADER);
         userRepository.save(leader);
 
-        // generate project key
+        group = groupRepository.findById(group.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group not found after update"));
+
         String projectKey = generateProjectKey(request.getGroupName());
 
         while (groupRepository.existsByProjectKey(projectKey)) {
             projectKey = generateProjectKey(request.getGroupName());
         }
 
-        // tạo Jira project
         jiraService.createProjectForGroup(
                 group.getGroupId(),
                 projectKey,
                 request.getGroupName()
         );
 
+        // reload group sau khi tạo Jira project
+        group = groupRepository.findById(group.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group not found after Jira creation"));
+
+        System.out.println("=== START JIRA USER SYNC ===");
+
+        // sync leader
+        if (group.getTeamLeader() != null) {
+            try {
+                jiraService.syncUserToJiraProject(group, group.getTeamLeader());
+            } catch (Exception e) {
+                System.out.println("SYNC FAILED (LEADER): " + group.getTeamLeader().getEmail());
+                e.printStackTrace();
+            }
+        }
+
+        // sync members
+        for (User member : group.getMembers()) {
+            try {
+                jiraService.syncUserToJiraProject(group, member);
+            } catch (Exception e) {
+                System.out.println("SYNC FAILED (MEMBER): " + member.getEmail());
+                e.printStackTrace();
+            }
+        }
+
+        // sync lecturer
+        if (group.getLecturer() != null) {
+            try {
+                jiraService.syncUserToJiraProject(group, group.getLecturer());
+            } catch (Exception e) {
+                System.out.println("SYNC FAILED (LECTURER): " + group.getLecturer().getEmail());
+                e.printStackTrace();
+            }
+        }
+
+
+        System.out.println("=== JIRA USER SYNC FINISHED ===");
+
         request.setStatus(RequestStatus.APPROVED);
         groupRequestRepository.save(request);
     }
-
     @Override
     public void rejectRequest(int requestId) {
 
