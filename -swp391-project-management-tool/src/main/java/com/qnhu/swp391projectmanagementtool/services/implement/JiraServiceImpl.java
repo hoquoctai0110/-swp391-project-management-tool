@@ -206,9 +206,6 @@ public class JiraServiceImpl implements JiraService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-            String url = jiraProperties.getUrl()
-                    + "/rest/api/3/user/search?query=" + keyword;
-
             HttpEntity<String> entity = new HttpEntity<>(buildHeaders());
 
             ResponseEntity<String> response =
@@ -430,5 +427,10 @@ public class JiraServiceImpl implements JiraService {
         }
 
         return issues;
+    }
+
+    @Override
+    public String getAccountIdByEmail(String email) {
+        return findAccountId(email);
     }
 }

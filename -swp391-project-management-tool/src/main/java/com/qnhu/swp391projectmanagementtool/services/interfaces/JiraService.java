@@ -18,4 +18,6 @@ public interface JiraService {
 
     List<JiraIssue> syncIssuesFromProject(String projectKey);
 
+    String getAccountIdByEmail(String email);
+
 }
