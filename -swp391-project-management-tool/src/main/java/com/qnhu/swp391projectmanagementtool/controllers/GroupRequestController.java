@@ -22,7 +22,7 @@ public class GroupRequestController {
     // MEMBER tạo request
     @PostMapping
     public ResponseEntity<String> createRequest(@RequestBody CreateGroupRequest dto,
-                                                Authentication authentication) {
+            Authentication authentication) {
 
         String email = authentication.getName();
 
@@ -57,5 +57,13 @@ public class GroupRequestController {
         String email = authentication.getName();
 
         return groupRequestService.getMyRequests(email);
+    }
+
+    // MEMBER cancel request
+    @DeleteMapping("/{requestId}/cancel")
+    public ResponseEntity<String> cancelRequest(@PathVariable int requestId, Authentication authentication) {
+        String email = authentication.getName();
+        groupRequestService.cancelRequest(requestId, email);
+        return ResponseEntity.ok("Request cancelled successfully");
     }
 }

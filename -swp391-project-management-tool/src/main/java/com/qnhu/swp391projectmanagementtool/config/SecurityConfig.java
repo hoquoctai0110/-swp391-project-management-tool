@@ -51,7 +51,9 @@ public class SecurityConfig {
 
                                                                 "/api/admin/**",
                                                                 "/api/jira/test",
-                                                                "/api/jira/account-id"
+                                                                "/api/jira/account-id",
+                                                        "/api/users/members",
+                                                        "/api/users/lecturers"
 
                                                 ).permitAll()
 

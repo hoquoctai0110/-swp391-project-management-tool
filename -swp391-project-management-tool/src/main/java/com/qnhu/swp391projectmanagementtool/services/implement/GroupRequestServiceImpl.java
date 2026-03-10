@@ -140,8 +140,7 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         jiraService.createProjectForGroup(
                 group.getGroupId(),
                 projectKey,
-                request.getGroupName()
-        );
+                request.getGroupName());
 
         // reload group sau khi tạo Jira project
         group = groupRepository.findById(group.getGroupId())
@@ -179,12 +178,12 @@ public class GroupRequestServiceImpl implements GroupRequestService {
             }
         }
 
-
         System.out.println("=== JIRA USER SYNC FINISHED ===");
 
         request.setStatus(RequestStatus.APPROVED);
         groupRequestRepository.save(request);
     }
+
     @Override
     public void rejectRequest(int requestId) {
 
@@ -211,7 +210,7 @@ public class GroupRequestServiceImpl implements GroupRequestService {
             }
         }
 
-        int random = (int)(Math.random() * 90 + 10);
+        int random = (int) (Math.random() * 90 + 10);
 
         return (key.toString() + random)
                 .replaceAll("[^A-Za-z0-9]", "")
@@ -224,9 +223,21 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return groupRequestRepository.findByCreatedBy(user)
+        return groupRequestRepository.findByUserInvolved(user)
                 .stream()
                 .map(GroupRequestMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    public void cancelRequest(int requestId, String email) {
+        GroupRequest request = groupRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (request.getStatus() != RequestStatus.PENDING) {
+            throw new RuntimeException("Chỉ có thể hủy yêu cầu đang chờ duyệt");
+        }
+
+        groupRequestRepository.delete(request);
     }
 }

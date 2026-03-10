@@ -14,4 +14,6 @@ public interface GroupRequestService {
     void rejectRequest(int requestId);
 
     List<GroupRequestResponse> getMyRequests(String email);
+
+    void cancelRequest(int requestId, String email);
 }
