@@ -2,8 +2,10 @@ package com.qnhu.swp391projectmanagementtool;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class Swp391ProjectManagementToolApplication {
 
     public static void main(String[] args) {
