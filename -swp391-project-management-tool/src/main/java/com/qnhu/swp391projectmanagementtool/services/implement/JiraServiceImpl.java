@@ -16,6 +16,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.qnhu.swp391projectmanagementtool.dtos.JiraProjectDto;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.*;
 
@@ -432,5 +433,26 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public String getAccountIdByEmail(String email) {
         return findAccountId(email);
+    }
+
+    @Scheduled(fixedRate = 5000)
+    public void autoSyncAllProjects() {
+
+        List<Group> groups = groupRepository.findAll();
+
+        for (Group group : groups) {
+
+            if (group.getProjectKey() != null) {
+
+                try {
+                    syncIssuesFromProject(group.getProjectKey());
+                    System.out.println("Synced Jira project: " + group.getProjectKey());
+
+                } catch (Exception e) {
+
+                    System.out.println("Sync failed for project: " + group.getProjectKey());
+                }
+            }
+        }
     }
 }
