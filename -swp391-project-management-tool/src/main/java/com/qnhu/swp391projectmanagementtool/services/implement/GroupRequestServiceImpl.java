@@ -153,14 +153,14 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         System.out.println("=== START JIRA USER SYNC ===");
 
         // sync leader
-        if (group.getTeamLeader() != null) {
-            try {
-                jiraService.syncUserToJiraProject(group, group.getTeamLeader());
-            } catch (Exception e) {
-                System.out.println("SYNC FAILED (LEADER): " + group.getTeamLeader().getEmail());
-                e.printStackTrace();
-            }
-        }
+//        if (group.getTeamLeader() != null) {
+//            try {
+//                jiraService.syncUserToJiraProject(group, group.getTeamLeader());
+//            } catch (Exception e) {
+//                System.out.println("SYNC FAILED (LEADER): " + group.getTeamLeader().getEmail());
+//                e.printStackTrace();
+//            }
+//        }
 
         // sync members
         for (User member : request.getMembers()) {
@@ -173,14 +173,14 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         }
 
         // sync lecturer
-        if (group.getLecturer() != null) {
-            try {
-                jiraService.syncUserToJiraProject(group, group.getLecturer());
-            } catch (Exception e) {
-                System.out.println("SYNC FAILED (LECTURER): " + group.getLecturer().getEmail());
-                e.printStackTrace();
-            }
-        }
+//        if (group.getLecturer() != null) {
+//            try {
+//                jiraService.syncUserToJiraProject(group, group.getLecturer());
+//            } catch (Exception e) {
+//                System.out.println("SYNC FAILED (LECTURER): " + group.getLecturer().getEmail());
+//                e.printStackTrace();
+//            }
+//        }
 
         System.out.println("=== JIRA USER SYNC FINISHED ===");
 

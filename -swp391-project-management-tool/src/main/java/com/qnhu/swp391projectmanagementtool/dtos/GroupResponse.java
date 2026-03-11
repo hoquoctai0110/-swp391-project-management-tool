@@ -13,12 +13,12 @@ public class GroupResponse {
     private String projectId;
 
     public GroupResponse(int groupId,
-                         String groupName,
-                         UserSimpleResponse lecturer,
-                         UserSimpleResponse teamLeader,
-                         List<UserSimpleResponse> members,
-                         String projectKey,
-                         String projectId) {
+            String groupName,
+            UserSimpleResponse lecturer,
+            UserSimpleResponse teamLeader,
+            List<UserSimpleResponse> members,
+            String projectKey,
+            String projectId) {
 
         this.groupId = groupId;
         this.groupName = groupName;

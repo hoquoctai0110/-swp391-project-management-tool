@@ -257,7 +257,8 @@ public class JiraServiceImpl implements JiraService {
                       "emailAddress": "%s",
                       "products": [
                         "jira-software"
-                      ]
+                      ],
+                      "notification": "true"
                     }
                     """.formatted(email);
 
@@ -286,15 +287,33 @@ public class JiraServiceImpl implements JiraService {
 
             HttpEntity<String> entity = new HttpEntity<>(buildHeaders());
 
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
 
             JsonNode root = objectMapper.readTree(response.getBody());
 
+            String targetRole = roleName;
+
             if (!root.has(roleName)) {
-                return null;
+                // Fallback: search for any role that contains the target word
+                java.util.Iterator<String> fieldNames = root.fieldNames();
+                boolean found = false;
+                while (fieldNames.hasNext()) {
+                    String fieldName = fieldNames.next();
+                    if (roleName.equals("Administrators") && (fieldName.toLowerCase().contains("admin") || fieldName.toLowerCase().contains("quản trị"))) {
+                        targetRole = fieldName;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    System.err.println("JIRA ROLE NOT FOUND: " + roleName);
+                    System.err.println("AVAILABLE ROLES: " + root.toPrettyString());
+                    return null;
+                }
             }
 
-            String roleUrl = root.get(roleName).asText();
+            String roleUrl = root.get(targetRole).asText();
 
             return roleUrl.substring(roleUrl.lastIndexOf("/") + 1);
 

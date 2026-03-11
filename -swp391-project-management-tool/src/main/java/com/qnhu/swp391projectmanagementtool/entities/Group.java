@@ -30,29 +30,51 @@ public class Group {
     private User teamLeader;
 
     @ManyToMany
-    @JoinTable(
-            name = "group_members",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> members = new ArrayList<>();
 
-    public Group() {}
+    public Group() {
+    }
 
-    public int getGroupId() { return groupId; }
-    public void setGroupId(int groupId) { this.groupId = groupId; }
+    public int getGroupId() {
+        return groupId;
+    }
 
-    public String getGroupName() { return groupName; }
-    public void setGroupName(String groupName) { this.groupName = groupName; }
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
 
-    public User getLecturer() { return lecturer; }
-    public void setLecturer(User lecturer) { this.lecturer = lecturer; }
+    public String getGroupName() {
+        return groupName;
+    }
 
-    public User getTeamLeader() { return teamLeader; }
-    public void setTeamLeader(User teamLeader) { this.teamLeader = teamLeader; }
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 
-    public List<User> getMembers() { return members; }
-    public void setMembers(List<User> members) { this.members = members; }
+    public User getLecturer() {
+        return lecturer;
+    }
+
+    public void setLecturer(User lecturer) {
+        this.lecturer = lecturer;
+    }
+
+    public User getTeamLeader() {
+        return teamLeader;
+    }
+
+    public void setTeamLeader(User teamLeader) {
+        this.teamLeader = teamLeader;
+    }
+
+    public List<User> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<User> members) {
+        this.members = members;
+    }
 
     public void addMember(User user) {
         if (!this.members.contains(user)) {
@@ -64,9 +86,19 @@ public class Group {
         this.members.remove(user);
     }
 
-    public String getProjectKey() { return projectKey; }
-    public void setProjectKey(String projectKey) { this.projectKey = projectKey; }
+    public String getProjectKey() {
+        return projectKey;
+    }
 
-    public String getProjectId() { return projectId; }
-    public void setProjectId(String projectId) { this.projectId = projectId; }
+    public void setProjectKey(String projectKey) {
+        this.projectKey = projectKey;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
 }
