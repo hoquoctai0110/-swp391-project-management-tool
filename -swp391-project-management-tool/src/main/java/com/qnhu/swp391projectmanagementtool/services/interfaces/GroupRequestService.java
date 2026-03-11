@@ -11,7 +11,7 @@ public interface GroupRequestService {
 
     void approveRequest(int requestId);
 
-    void rejectRequest(int requestId);
+    void rejectRequest(int requestId, String reason);
 
     List<GroupRequestResponse> getMyRequests(String email);
 

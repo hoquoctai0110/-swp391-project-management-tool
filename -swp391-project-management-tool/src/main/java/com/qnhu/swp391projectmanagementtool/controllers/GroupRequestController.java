@@ -44,9 +44,9 @@ public class GroupRequestController {
     // ADMIN reject request
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{requestId}/reject")
-    public ResponseEntity<String> rejectRequest(@PathVariable int requestId) {
+    public ResponseEntity<String> rejectRequest(@PathVariable int requestId, String reason) {
 
-        groupRequestService.rejectRequest(requestId);
+        groupRequestService.rejectRequest(requestId, reason);
 
         return ResponseEntity.ok("Request rejected successfully");
     }

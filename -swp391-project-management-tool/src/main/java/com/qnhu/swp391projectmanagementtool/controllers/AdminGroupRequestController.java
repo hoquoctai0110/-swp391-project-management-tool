@@ -17,55 +17,53 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminGroupRequestController {
 
-    private final GroupRequestService groupRequestService;
-    private final GroupRequestRepository groupRequestRepository;
+        private final GroupRequestService groupRequestService;
+        private final GroupRequestRepository groupRequestRepository;
 
-    @GetMapping
-    @Transactional
-    public List<GroupRequestResponse> getAllRequests() {
+        @GetMapping
+        @Transactional
+        public List<GroupRequestResponse> getAllRequests() {
 
-        return groupRequestRepository.findAll()
-                .stream()
-                .map(r -> new GroupRequestResponse(
+                return groupRequestRepository.findAll()
+                                .stream()
+                                .map(r -> new GroupRequestResponse(
 
-                        r.getRequestId(),
-                        r.getGroupName(),
+                                                r.getRequestId(),
+                                                r.getGroupName(),
 
-                        new UserSimpleResponse(
-                                r.getLecturer().getUserId(),
-                                r.getLecturer().getUsername()
-                        ),
+                                                new UserSimpleResponse(
+                                                                r.getLecturer().getUserId(),
+                                                                r.getLecturer().getUsername()),
 
-                        new UserSimpleResponse(
-                                r.getLeader().getUserId(),
-                                r.getLeader().getUsername()
-                        ),
+                                                new UserSimpleResponse(
+                                                                r.getLeader().getUserId(),
+                                                                r.getLeader().getUsername()),
 
-                        r.getMembers().stream()
-                                .map(m -> new UserSimpleResponse(
-                                        m.getUserId(),
-                                        m.getUsername()
-                                ))
-                                .toList(),
+                                                r.getMembers().stream()
+                                                                .map(m -> new UserSimpleResponse(
+                                                                                m.getUserId(),
+                                                                                m.getUsername()))
+                                                                .toList(),
 
-                        r.getStatus().name()
-                ))
-                .toList();
-    }
+                                                r.getStatus().name(),
+                                                r.getRejectionReason()))
+                                .toList();
+        }
 
-    @PutMapping("/{id}/approve")
-    public String approveRequest(@PathVariable int id) {
+        @PutMapping("/{id}/approve")
+        public String approveRequest(@PathVariable int id) {
 
-        groupRequestService.approveRequest(id);
+                groupRequestService.approveRequest(id);
 
-        return "Request approved successfully!";
-    }
+                return "Request approved successfully!";
+        }
 
-    @PutMapping("/{id}/reject")
-    public String rejectRequest(@PathVariable int id) {
+        @PutMapping("/{id}/reject")
+        public String rejectRequest(@PathVariable int id,
+                        @RequestBody(required = false) java.util.Map<String, String> body) {
+                String reason = (body != null && body.containsKey("reason")) ? body.get("reason") : null;
+                groupRequestService.rejectRequest(id, reason);
 
-        groupRequestService.rejectRequest(id);
-
-        return "Request rejected successfully!";
-    }
+                return "Request rejected successfully!";
+        }
 }

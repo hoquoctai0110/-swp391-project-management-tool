@@ -17,8 +17,7 @@ public class GroupRequestMapper {
             lecturer = new UserSimpleResponse(
                     request.getLecturer().getUserId(),
                     request.getLecturer().getUsername(),
-                    request.getLecturer().getRole().name()
-            );
+                    request.getLecturer().getRole().name());
         }
 
         UserSimpleResponse leader = null;
@@ -26,15 +25,13 @@ public class GroupRequestMapper {
             leader = new UserSimpleResponse(
                     request.getLeader().getUserId(),
                     request.getLeader().getUsername(),
-                    request.getLeader().getRole().name()
-            );
+                    request.getLeader().getRole().name());
         }
 
-        List<UserSimpleResponse> members =
-                request.getMembers()
-                        .stream()
-                        .map(GroupRequestMapper::toUserSimple)
-                        .collect(Collectors.toList());
+        List<UserSimpleResponse> members = request.getMembers()
+                .stream()
+                .map(GroupRequestMapper::toUserSimple)
+                .collect(Collectors.toList());
 
         return new GroupRequestResponse(
                 request.getRequestId(),
@@ -42,15 +39,14 @@ public class GroupRequestMapper {
                 lecturer,
                 leader,
                 members,
-                request.getStatus().name()
-        );
+                request.getStatus().name(),
+                request.getRejectionReason());
     }
 
     private static UserSimpleResponse toUserSimple(User user) {
         return new UserSimpleResponse(
                 user.getUserId(),
                 user.getUsername(),
-                user.getRole().name()
-        );
+                user.getRole().name());
     }
 }

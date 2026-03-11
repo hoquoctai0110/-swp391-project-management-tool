@@ -33,7 +33,7 @@ public class JiraController {
         return jiraService.syncIssuesFromProject(projectKey);
     }
   
-    @GetMapping("/account-id")
+    @GetMapping("/accountId")
     public org.springframework.http.ResponseEntity<?> getJiraAccountId(@RequestParam String email) {
         String accountId = jiraService.getAccountIdByEmail(email);
         if (accountId != null) {

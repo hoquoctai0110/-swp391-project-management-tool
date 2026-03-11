@@ -46,9 +46,7 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             return response.getStatusCode() == HttpStatus.OK;
 
@@ -73,8 +71,7 @@ public class JiraServiceImpl implements JiraService {
 
         String auth = jiraProperties.getEmail() + ":" + jiraProperties.getToken();
 
-        String encoded =
-                Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+        String encoded = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
 
         return "Basic " + encoded;
     }
@@ -94,24 +91,27 @@ public class JiraServiceImpl implements JiraService {
         String leadAccountId = getMyAccountId();
 
         String body = """
-        {
-          "key": "%s",
-          "name": "%s",
-          "projectTypeKey": "software",
-          "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
-          "leadAccountId": "%s"
-        }
-        """.formatted(projectKey, projectName, leadAccountId);
+                {
+                  "key": "%s",
+                  "name": "%s",
+                  "projectTypeKey": "software",
+                  "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
+                  "leadAccountId": "%s"
+                }
+                """.formatted(projectKey, projectName, leadAccountId);
 
         HttpEntity<String> entity = new HttpEntity<>(body, buildHeaders());
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
             if (response.getStatusCode() == HttpStatus.CREATED) {
 
+                JsonNode root = objectMapper.readTree(response.getBody());
+                String jiraProjectId = root.get("id").asText();
+
                 group.setProjectKey(projectKey);
+                group.setProjectId(jiraProjectId);
                 groupRepository.save(group);
 
             } else {
@@ -119,10 +119,15 @@ public class JiraServiceImpl implements JiraService {
                 throw new RuntimeException("Failed to create Jira project");
             }
 
-        } catch (Exception e) {
-
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
             e.printStackTrace();
-            throw new RuntimeException("Create project failed", e);
+            String responseBody = e.getResponseBodyAsString();
+            System.err.println("JIRA HTTP ERROR: " + responseBody);
+            throw new RuntimeException("Create project failed (HTTP " + e.getStatusCode() + "): " + responseBody, e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("JIRA OTHER ERROR: " + e.getMessage());
+            throw new RuntimeException("Create project failed: " + e.getMessage(), e);
         }
     }
 
@@ -133,8 +138,7 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(buildHeaders());
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             JsonNode root = objectMapper.readTree(response.getBody());
 
@@ -202,20 +206,21 @@ public class JiraServiceImpl implements JiraService {
      */
     private String findAccountId(String keyword) {
         try {
-        String url = jiraProperties.getUrl()
-                + "/rest/api/3/user/search?query={email}";
+            String url = jiraProperties.getUrl()
+                    + "/rest/api/3/user/search?query=" + keyword;
 
-        RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = new RestTemplate();
 
             HttpEntity<String> entity = new HttpEntity<>(buildHeaders());
 
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             JsonNode arr = objectMapper.readTree(response.getBody());
 
-            if (arr.isEmpty()) {
-                return null;
+            if (!arr.isArray() || arr.size() == 0) {
+                // Return null means user not found. Let's create/invite the user instead!
+                System.out.println("User not found in Jira search, attempting to invite: " + keyword);
+                return inviteUserToJira(keyword);
             }
 
             for (JsonNode user : arr) {
@@ -243,6 +248,35 @@ public class JiraServiceImpl implements JiraService {
         }
     }
 
+    private String inviteUserToJira(String email) {
+        try {
+            String url = jiraProperties.getUrl() + "/rest/api/3/user";
+            
+            String body = """
+                    {
+                      "emailAddress": "%s",
+                      "products": [
+                        "jira-software"
+                      ]
+                    }
+                    """.formatted(email);
+
+            RestTemplate rt = new RestTemplate();
+            HttpEntity<String> entity = new HttpEntity<>(body, buildHeaders());
+            ResponseEntity<String> response = rt.exchange(url, org.springframework.http.HttpMethod.POST, entity, String.class);
+            JsonNode root = objectMapper.readTree(response.getBody());
+            
+            if (root.has("accountId")) {
+                return root.get("accountId").asText();
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("INVITE USER FAILED FOR: " + email);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private String getProjectRoleId(String projectKey, String roleName) {
 
         try {
@@ -252,8 +286,7 @@ public class JiraServiceImpl implements JiraService {
 
             HttpEntity<String> entity = new HttpEntity<>(buildHeaders());
 
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             JsonNode root = objectMapper.readTree(response.getBody());
 
@@ -279,13 +312,12 @@ public class JiraServiceImpl implements JiraService {
                     + "/rest/api/3/project/" + projectKey + "/role/" + roleId;
 
             String body = """
-            {
-               "user": ["%s"]
-            }
-            """.formatted(accountId);
+                    {
+                       "user": ["%s"]
+                    }
+                    """.formatted(accountId);
 
-            HttpEntity<String> entity =
-                    new HttpEntity<>(body, buildHeaders());
+            HttpEntity<String> entity = new HttpEntity<>(body, buildHeaders());
 
             restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
@@ -309,8 +341,7 @@ public class JiraServiceImpl implements JiraService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             JsonNode root = objectMapper.readTree(response.getBody());
 
@@ -350,17 +381,14 @@ public class JiraServiceImpl implements JiraService {
                 "status",
                 "priority",
                 "assignee",
-                "project"
-        ));
-        HttpEntity<Map<String, Object>> entity =
-                new HttpEntity<>(body, buildHeaders());
+                "project"));
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, buildHeaders());
 
         ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
                 entity,
-                String.class
-        );
+                String.class);
 
         List<JiraIssue> issues = new ArrayList<>();
 
@@ -401,20 +429,17 @@ public class JiraServiceImpl implements JiraService {
 
                 if (fields.has("priority") && !fields.get("priority").isNull()) {
                     issue.setPriority(
-                            fields.get("priority").get("name").asText()
-                    );
+                            fields.get("priority").get("name").asText());
                 }
 
                 if (fields.has("project") && fields.get("project").has("key")) {
                     issue.setProjectKey(
-                            fields.get("project").get("key").asText()
-                    );
+                            fields.get("project").get("key").asText());
                 }
 
                 if (fields.has("assignee") && !fields.get("assignee").isNull()) {
                     issue.setAssignee(
-                            fields.get("assignee").get("displayName").asText()
-                    );
+                            fields.get("assignee").get("displayName").asText());
                 }
 
                 jiraIssueRepository.save(issue);
@@ -435,7 +460,7 @@ public class JiraServiceImpl implements JiraService {
         return findAccountId(email);
     }
 
-    @Scheduled(fixedRate = 5000)
+//    @Scheduled(fixedRate = 5000)
     public void autoSyncAllProjects() {
 
         List<Group> groups = groupRepository.findAll();

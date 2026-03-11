@@ -41,7 +41,9 @@ public class GroupMapper {
                 group.getGroupName(),
                 lecturer,
                 leader,
-                members
+                members,
+                group.getProjectKey(),
+                group.getProjectId()
         );
     }
 

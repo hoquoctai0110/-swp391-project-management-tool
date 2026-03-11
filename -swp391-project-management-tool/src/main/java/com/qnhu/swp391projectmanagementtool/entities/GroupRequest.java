@@ -30,39 +30,87 @@ public class GroupRequest {
     private User leader;
 
     @ManyToMany
-    @JoinTable(
-            name = "group_request_members",
-            joinColumns = @JoinColumn(name = "request_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "group_request_members", joinColumns = @JoinColumn(name = "request_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> members = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
-    public GroupRequest() {}
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason;
 
-    public int getRequestId() { return requestId; }
-    public void setRequestId(int requestId) { this.requestId = requestId; }
+    public GroupRequest() {
+    }
 
-    public String getGroupName() { return groupName; }
-    public void setGroupName(String groupName) { this.groupName = groupName; }
+    public int getRequestId() {
+        return requestId;
+    }
 
-    public String getProjectKey() { return projectKey; }
-    public void setProjectKey(String projectKey) { this.projectKey = projectKey; }
+    public void setRequestId(int requestId) {
+        this.requestId = requestId;
+    }
 
-    public User getCreatedBy() { return createdBy; }
-    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
+    public String getGroupName() {
+        return groupName;
+    }
 
-    public User getLecturer() { return lecturer; }
-    public void setLecturer(User lecturer) { this.lecturer = lecturer; }
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 
-    public User getLeader() { return leader; }
-    public void setLeader(User leader) { this.leader = leader; }
+    public String getProjectKey() {
+        return projectKey;
+    }
 
-    public List<User> getMembers() { return members; }
-    public void setMembers(List<User> members) { this.members = members; }
+    public void setProjectKey(String projectKey) {
+        this.projectKey = projectKey;
+    }
 
-    public RequestStatus getStatus() { return status; }
-    public void setStatus(RequestStatus status) { this.status = status; }
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public User getLecturer() {
+        return lecturer;
+    }
+
+    public void setLecturer(User lecturer) {
+        this.lecturer = lecturer;
+    }
+
+    public User getLeader() {
+        return leader;
+    }
+
+    public void setLeader(User leader) {
+        this.leader = leader;
+    }
+
+    public List<User> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<User> members) {
+        this.members = members;
+    }
+
+    public RequestStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RequestStatus status) {
+        this.status = status;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
 }

@@ -137,10 +137,14 @@ public class GroupRequestServiceImpl implements GroupRequestService {
             projectKey = generateProjectKey(request.getGroupName());
         }
 
+        // Tạo tên dự án không bị trùng bằng cách thêm đuôi ngẫu nhiên
+        int randomSuffix = (int) (Math.random() * 9000 + 1000); // 4 chữ số
+        String uniqueProjectName = request.getGroupName() + " P" + randomSuffix;
+
         jiraService.createProjectForGroup(
                 group.getGroupId(),
                 projectKey,
-                request.getGroupName());
+                uniqueProjectName);
 
         // reload group sau khi tạo Jira project
         group = groupRepository.findById(group.getGroupId())
@@ -159,7 +163,7 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         }
 
         // sync members
-        for (User member : group.getMembers()) {
+        for (User member : request.getMembers()) {
             try {
                 jiraService.syncUserToJiraProject(group, member);
             } catch (Exception e) {
@@ -185,7 +189,7 @@ public class GroupRequestServiceImpl implements GroupRequestService {
     }
 
     @Override
-    public void rejectRequest(int requestId) {
+    public void rejectRequest(int requestId, String reason) {
 
         GroupRequest request = groupRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
@@ -195,6 +199,7 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         }
 
         request.setStatus(RequestStatus.REJECTED);
+        request.setRejectionReason(reason);
 
         groupRequestRepository.save(request);
     }
@@ -210,11 +215,19 @@ public class GroupRequestServiceImpl implements GroupRequestService {
             }
         }
 
+        String cleanedKey = key.toString().replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+
+        if (cleanedKey.isEmpty() || Character.isDigit(cleanedKey.charAt(0))) {
+            cleanedKey = "P" + cleanedKey;
+        }
+
+        if (cleanedKey.length() > 6) {
+            cleanedKey = cleanedKey.substring(0, 6);
+        }
+
         int random = (int) (Math.random() * 90 + 10);
 
-        return (key.toString() + random)
-                .replaceAll("[^A-Za-z0-9]", "")
-                .toUpperCase();
+        return cleanedKey + random;
     }
 
     @Override

@@ -9,18 +9,24 @@ public class GroupResponse {
     private UserSimpleResponse lecturer;
     private UserSimpleResponse teamLeader;
     private List<UserSimpleResponse> members;
+    private String projectKey;
+    private String projectId;
 
     public GroupResponse(int groupId,
                          String groupName,
                          UserSimpleResponse lecturer,
                          UserSimpleResponse teamLeader,
-                         List<UserSimpleResponse> members) {
+                         List<UserSimpleResponse> members,
+                         String projectKey,
+                         String projectId) {
 
         this.groupId = groupId;
         this.groupName = groupName;
         this.lecturer = lecturer;
         this.teamLeader = teamLeader;
         this.members = members;
+        this.projectKey = projectKey;
+        this.projectId = projectId;
     }
 
     public int getGroupId() {
@@ -41,5 +47,13 @@ public class GroupResponse {
 
     public List<UserSimpleResponse> getMembers() {
         return members;
+    }
+
+    public String getProjectKey() {
+        return projectKey;
+    }
+
+    public String getProjectId() {
+        return projectId;
     }
 }
