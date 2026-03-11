@@ -1,6 +1,7 @@
 package com.qnhu.swp391projectmanagementtool.entities;
 
 import com.qnhu.swp391projectmanagementtool.enums.Role;
+import com.qnhu.swp391projectmanagementtool.enums.UserStatus;
 import jakarta.persistence.*;
 
 @Entity
@@ -27,6 +28,10 @@ public class User {
     private String githubAccountId;
     @Column(name = "github_synced")
     private Boolean githubSynced = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private UserStatus status = UserStatus.ACTIVE;
 
     public User() {
     }
@@ -130,5 +135,13 @@ public class User {
     }
 
     public void commitToGitHub() {
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 }
