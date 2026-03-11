@@ -1,21 +1,38 @@
 package com.qnhu.swp391projectmanagementtool.dtos;
 
 public class AdminDashboardDto {
+
     private long totalProjects;
     private long totalIssues;
+
     private long todo;
     private long inProgress;
     private long done;
 
+    private long totalMembers;
+    private long totalLeaders;
+    private long totalLecturers;
+
     public AdminDashboardDto() {
     }
 
-    public AdminDashboardDto(long totalProjects, long totalIssues, long todo, long inProgress, long done) {
+    public AdminDashboardDto(long totalProjects,
+                             long totalIssues,
+                             long todo,
+                             long inProgress,
+                             long done,
+                             long totalMembers,
+                             long totalLeaders,
+                             long totalLecturers) {
+
         this.totalProjects = totalProjects;
         this.totalIssues = totalIssues;
         this.todo = todo;
         this.inProgress = inProgress;
         this.done = done;
+        this.totalMembers = totalMembers;
+        this.totalLeaders = totalLeaders;
+        this.totalLecturers = totalLecturers;
     }
 
     public long getTotalProjects() {
@@ -56,5 +73,29 @@ public class AdminDashboardDto {
 
     public void setDone(long done) {
         this.done = done;
+    }
+
+    public long getTotalMembers() {
+        return totalMembers;
+    }
+
+    public void setTotalMembers(long totalMembers) {
+        this.totalMembers = totalMembers;
+    }
+
+    public long getTotalLeaders() {
+        return totalLeaders;
+    }
+
+    public void setTotalLeaders(long totalLeaders) {
+        this.totalLeaders = totalLeaders;
+    }
+
+    public long getTotalLecturers() {
+        return totalLecturers;
+    }
+
+    public void setTotalLecturers(long totalLecturers) {
+        this.totalLecturers = totalLecturers;
     }
 }
