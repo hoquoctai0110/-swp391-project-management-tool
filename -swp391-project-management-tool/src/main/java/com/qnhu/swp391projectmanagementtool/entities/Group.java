@@ -33,6 +33,9 @@ public class Group {
     @JoinTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> members = new ArrayList<>();
 
+    @Column(name = "github_link", unique = true)
+    private String githubLink;
+
     public Group() {
     }
 
@@ -101,4 +104,8 @@ public class Group {
     public void setProjectId(String projectId) {
         this.projectId = projectId;
     }
+
+    public String getGithubLink() {return githubLink;}
+
+    public void setGithubLink(String githubLink) {this.githubLink = githubLink;}
 }

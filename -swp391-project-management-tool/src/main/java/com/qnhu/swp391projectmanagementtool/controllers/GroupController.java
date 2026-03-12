@@ -56,4 +56,19 @@ public class GroupController {
 
         return ResponseEntity.ok("Group deleted successfully");
     }
+
+    @PutMapping("/{groupId}/github-link")
+    public ResponseEntity<?> updateGithubLink(
+            @PathVariable int groupId,
+            @RequestBody java.util.Map<String, String> body,
+            Authentication authentication) {
+        
+        String githubLink = body.get("githubLink");
+        if (githubLink == null || githubLink.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("GitHub link is required");
+        }
+
+        groupService.updateGithubLink(groupId, githubLink.trim(), authentication.getName());
+        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "GitHub link updated successfully"));
+    }
 }

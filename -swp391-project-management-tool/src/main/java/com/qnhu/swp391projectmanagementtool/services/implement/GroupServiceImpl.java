@@ -183,4 +183,18 @@ public class GroupServiceImpl implements IGroupService {
 
         groupRepository.save(group);
     }
+
+    @Override
+    public void updateGithubLink(int groupId, String githubLink, String currentUserEmail) {
+        
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        if (group.getTeamLeader() == null || !group.getTeamLeader().getEmail().equals(currentUserEmail)) {
+            throw new RuntimeException("Only the team leader can update the GitHub link");
+        }
+
+        group.setGithubLink(githubLink);
+        groupRepository.save(group);
+    }
 }

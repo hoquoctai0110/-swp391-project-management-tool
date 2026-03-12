@@ -24,4 +24,6 @@ public interface IGroupService {
     void removeMember(int groupId, int userId);
 
     void removeLecturer(int groupId);
+    
+    void updateGithubLink(int groupId, String githubLink, String currentUserEmail);
 }

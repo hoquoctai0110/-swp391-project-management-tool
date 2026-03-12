@@ -43,7 +43,8 @@ public class GroupMapper {
                 leader,
                 members,
                 group.getProjectKey(),
-                group.getProjectId()
+                group.getProjectId(),
+                group.getGithubLink()
         );
     }
 

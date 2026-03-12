@@ -11,6 +11,7 @@ public class GroupResponse {
     private List<UserSimpleResponse> members;
     private String projectKey;
     private String projectId;
+    private String githubLink;
 
     public GroupResponse(int groupId,
             String groupName,
@@ -18,7 +19,7 @@ public class GroupResponse {
             UserSimpleResponse teamLeader,
             List<UserSimpleResponse> members,
             String projectKey,
-            String projectId) {
+            String projectId, String githubLink) {
 
         this.groupId = groupId;
         this.groupName = groupName;
@@ -27,6 +28,7 @@ public class GroupResponse {
         this.members = members;
         this.projectKey = projectKey;
         this.projectId = projectId;
+        this.githubLink = githubLink;
     }
 
     public int getGroupId() {
@@ -55,5 +57,9 @@ public class GroupResponse {
 
     public String getProjectId() {
         return projectId;
+    }
+
+    public String getGithubLink() {
+        return githubLink;
     }
 }
