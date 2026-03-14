@@ -26,4 +26,28 @@ public class GithubController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping
+    public ResponseEntity<List<GithubCommitDto>> getIndividualCommits(
+            @RequestParam String owner,
+            @RequestParam String repo,
+            @RequestParam String author) {
+        try {
+            List<GithubCommitDto> commits = githubService.getIndividualCommits(owner, repo, author);
+            return ResponseEntity.ok(commits);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/webhook")
+    public ResponseEntity<Void> handleGithubWebhook(@RequestBody java.util.Map<String, Object> payload) {
+        try {
+            githubService.processGithubWebhook(payload);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

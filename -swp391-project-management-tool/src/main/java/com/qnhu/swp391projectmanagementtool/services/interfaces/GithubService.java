@@ -5,4 +5,6 @@ import java.util.List;
 
 public interface GithubService {
     List<GithubCommitDto> getRepositoryCommits(String owner, String repo);
+    List<GithubCommitDto> getIndividualCommits(String owner, String repo, String author);
+    void processGithubWebhook(java.util.Map<String, Object> payload);
 }

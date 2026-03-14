@@ -1,8 +1,7 @@
 package com.qnhu.swp391projectmanagementtool.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,11 +10,56 @@ public class CommitMapping {
 
     @Id
     private String commitHash;
-
-    private int userId;
+    private String message;
+    private String repository;
+    private String branch;
+    private String jiraIssueKey;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
     private LocalDateTime commitDate;
     private int linesAdded;
     private int linesDeleted;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getRepository() {
+        return repository;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setRepository(String repository) {
+        this.repository = repository;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public void setJiraIssueKey(String jiraIssueKey) {
+        this.jiraIssueKey = jiraIssueKey;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public String getJiraIssueKey() {
+        return jiraIssueKey;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public CommitMapping() {
     }
@@ -26,14 +70,6 @@ public class CommitMapping {
 
     public void setCommitHash(String commitHash) {
         this.commitHash = commitHash;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public LocalDateTime getCommitDate() {
@@ -58,8 +94,5 @@ public class CommitMapping {
 
     public void setLinesDeleted(int linesDeleted) {
         this.linesDeleted = linesDeleted;
-    }
-
-    public void getCommitDetails() {
     }
 }

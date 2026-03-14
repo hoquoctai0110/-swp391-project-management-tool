@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByStatus(UserStatus status);
     List<User> findByStatusAndRole(UserStatus status, Role role);
     long countByRole(Role role);
+
+    Optional<User> findByGithubAccountId(String githubAccountId);
 }
