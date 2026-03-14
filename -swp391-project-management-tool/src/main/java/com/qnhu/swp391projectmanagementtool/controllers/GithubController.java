@@ -45,6 +45,7 @@ public class GithubController {
         try {
             githubService.processGithubWebhook(payload);
             System.out.println(payload);
+            System.out.println(payload);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
