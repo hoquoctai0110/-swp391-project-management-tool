@@ -44,6 +44,7 @@ public class GithubController {
     public ResponseEntity<Void> handleGithubWebhook(@RequestBody java.util.Map<String, Object> payload) {
         try {
             githubService.processGithubWebhook(payload);
+            System.out.println(payload);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
