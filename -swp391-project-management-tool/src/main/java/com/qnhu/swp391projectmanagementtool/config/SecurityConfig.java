@@ -53,7 +53,8 @@ public class SecurityConfig {
                                                                 "/api/jira/test",
                                                                 "/api/jira/account-id",
                                                         "/api/users/members",
-                                                        "/api/users/lecturers"
+                                                        "/api/users/lecturers",
+                                                        "/api/github/webhook/github"
 
                                                 ).permitAll()
 
