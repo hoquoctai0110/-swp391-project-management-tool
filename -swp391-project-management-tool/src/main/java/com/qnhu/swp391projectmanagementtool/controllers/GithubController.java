@@ -40,7 +40,7 @@ public class GithubController {
         }
     }
 
-    @PostMapping("/webhook")
+    @PostMapping("/webhook/github")
     public ResponseEntity<Void> handleGithubWebhook(@RequestBody java.util.Map<String, Object> payload) {
         try {
             githubService.processGithubWebhook(payload);
